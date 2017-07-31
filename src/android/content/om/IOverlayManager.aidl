@@ -83,12 +83,15 @@ interface IOverlayManager {
      * @param packageName The name of the overlay package.
      * @param enable true to enable the overlay, false to disable it.
      * @param userId The user for which to change the overlay.
-     * @param shouldWait true to wait to reload resources until refresh is called
      * @return true if the system successfully registered the request, false
      *         otherwise.
      */
-    boolean setEnabled(in String packageName, in boolean enable, in int userId,
-                       in boolean shouldWait);
+    boolean setEnabled(in String packageName, in boolean enable, in int userId);
+
+    /**
+     * Version of setEnabled that will also disable any other overlays for the target package.
+     */
+    boolean setEnabledExclusive(in String packageName, in boolean enable, in int userId);
 
     /**
      * Change the priority of the given overlay to be just higher than the
@@ -128,10 +131,4 @@ interface IOverlayManager {
      * @param userId The user for which to change the overlay.
      */
     boolean setLowestPriority(in String packageName, in int userId);
-
-    /**
-     * Refresh assets
-     * @param uid the user to refresh assets for
-     */
-    void refresh(in int uid);
 }

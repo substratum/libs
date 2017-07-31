@@ -33,40 +33,32 @@ public final class OverlayInfo implements Parcelable {
      * com.android.server.om.OverlayManagerService} should never have this
      * state.
      */
-    public static final int STATE_NOT_APPROVED_UNKNOWN = -1;
+    public static final int STATE_UNKNOWN = -1;
 
     /**
-     * The overlay package is disabled by the PackageManager.
+     * The target package of the overlay is not installed. The overlay cannot be enabled.
      */
-    public static final int STATE_NOT_APPROVED_COMPONENT_DISABLED = 0;
+    public static final int STATE_MISSING_TARGET = 0;
 
     /**
-     * The target package of the overlay is not installed.
+     * Creation of idmap file failed (e.g. no matching resources). The overlay
+     * cannot be enabled.
      */
-    public static final int STATE_NOT_APPROVED_MISSING_TARGET = 1;
+    public static final int STATE_NO_IDMAP = 1;
 
     /**
-     * Creation of idmap file failed (e.g. no matching resources).
+     * The overlay is currently disabled. It can be enabled.
+     *
+     * @see IOverlayManager.setEnabled
      */
-    public static final int STATE_NOT_APPROVED_NO_IDMAP = 2;
+    public static final int STATE_DISABLED = 2;
 
     /**
-     * The overlay package is dangerous, i.e. it touches resources not explicitly
-     * OK'd by the target package.
+     * The overlay is currently enabled. It can be disabled.
+     *
+     * @see IOverlayManager.setEnabled
      */
-    public static final int STATE_NOT_APPROVED_DANGEROUS_OVERLAY = 3;
-
-    /**
-     * The OverlayInfo is currently disabled but it is allowed to be enabled
-     * ({@link #STATE_APPROVED_ENABLED}) in the future.
-     */
-    public static final int STATE_APPROVED_DISABLED = 4;
-
-    /**
-     * The OverlayInfo is enabled but can be disabled
-     * ({@link #STATE_APPROVED_DISABLED}) in the future.
-     */
-    public static final int STATE_APPROVED_ENABLED = 5;
+    public static final int STATE_ENABLED = 3;
 
     /**
      * Package name of the overlay package
@@ -85,20 +77,11 @@ public final class OverlayInfo implements Parcelable {
 
     /**
      * The state of this OverlayInfo as defined by the STATE_* constants in this class.
-     * <p/>
-     * The state of an OverlayInfo determines if it is approved and/or enabled. An OverlayInfo with
-     * one of the STATE_NOT_APPROVED_* states cannot be enabled, and can thus never be part of the
-     * best match in the resource lookup.
-     * <p/>
-     * The only way to get an overlay package to be active and be part of the best matching in the
-     * resource lookup is if the corresponding OverlayInfo is in an STATE_*_ENABLED state.
      *
-     * @see #STATE_NOT_APPROVED_COMPONENT_DISABLED
-     * @see #STATE_NOT_APPROVED_MISSING_TARGET
-     * @see #STATE_NOT_APPROVED_NO_IDMAP
-     * @see #STATE_NOT_APPROVED_DANGEROUS_OVERLAY
-     * @see #STATE_APPROVED_DISABLED
-     * @see #STATE_APPROVED_ENABLED
+     * @see #STATE_MISSING_TARGET
+     * @see #STATE_NO_IDMAP
+     * @see #STATE_DISABLED
+     * @see #STATE_ENABLED
      */
     public final int state;
 
@@ -148,13 +131,11 @@ public final class OverlayInfo implements Parcelable {
             throw new IllegalArgumentException("baseCodePath must not be null");
         }
         switch (state) {
-            case STATE_NOT_APPROVED_UNKNOWN:
-            case STATE_NOT_APPROVED_COMPONENT_DISABLED:
-            case STATE_NOT_APPROVED_MISSING_TARGET:
-            case STATE_NOT_APPROVED_NO_IDMAP:
-            case STATE_NOT_APPROVED_DANGEROUS_OVERLAY:
-            case STATE_APPROVED_DISABLED:
-            case STATE_APPROVED_ENABLED:
+            case STATE_UNKNOWN:
+            case STATE_MISSING_TARGET:
+            case STATE_NO_IDMAP:
+            case STATE_DISABLED:
+            case STATE_ENABLED:
                 break;
             default:
                 throw new IllegalArgumentException("State " + state + " is not a valid state");
@@ -188,7 +169,7 @@ public final class OverlayInfo implements Parcelable {
     };
 
     /**
-     * Returns true if this overlay is enabled, i.e. should be used to overlay
+     * Return true if this overlay is enabled, i.e. should be used to overlay
      * the resources in the target package.
      *
      * Disabled overlay packages are installed but are currently not in use.
@@ -197,7 +178,7 @@ public final class OverlayInfo implements Parcelable {
      */
     public boolean isEnabled() {
         switch (state) {
-            case STATE_APPROVED_ENABLED:
+            case STATE_ENABLED:
                 return true;
             default:
                 return false;
@@ -211,30 +192,37 @@ public final class OverlayInfo implements Parcelable {
      */
     public boolean isApproved() {
         switch (state) {
-            case STATE_APPROVED_ENABLED:
-            case STATE_APPROVED_DISABLED:
+            case STATE_ENABLED:
+            case STATE_DISABLED:
                 return true;
             default:
                 return false;
         }
     }
 
+    /**
+     * Translate a state to a human readable string. Only intended for
+     * debugging purposes.
+     *
+     * @see #STATE_MISSING_TARGET
+     * @see #STATE_NO_IDMAP
+     * @see #STATE_DISABLED
+     * @see #STATE_ENABLED
+     *
+     * @return a human readable String representing the state.
+     */
     public static String stateToString(int state) {
         switch (state) {
-            case STATE_NOT_APPROVED_UNKNOWN:
-                return "STATE_NOT_APPROVED_UNKNOWN";
-            case STATE_NOT_APPROVED_COMPONENT_DISABLED:
-                return "STATE_NOT_APPROVED_COMPONENT_DISABLED";
-            case STATE_NOT_APPROVED_MISSING_TARGET:
-                return "STATE_NOT_APPROVED_MISSING_TARGET";
-            case STATE_NOT_APPROVED_NO_IDMAP:
-                return "STATE_NOT_APPROVED_NO_IDMAP";
-            case STATE_NOT_APPROVED_DANGEROUS_OVERLAY:
-                return "STATE_NOT_APPROVED_DANGEROUS_OVERLAY";
-            case STATE_APPROVED_DISABLED:
-                return "STATE_APPROVED_DISABLED";
-            case STATE_APPROVED_ENABLED:
-                return "STATE_APPROVED_ENABLED";
+            case STATE_UNKNOWN:
+                return "STATE_UNKNOWN";
+            case STATE_MISSING_TARGET:
+                return "STATE_MISSING_TARGET";
+            case STATE_NO_IDMAP:
+                return "STATE_NO_IDMAP";
+            case STATE_DISABLED:
+                return "STATE_DISABLED";
+            case STATE_ENABLED:
+                return "STATE_ENABLED";
             default:
                 return "<unknown state>";
         }

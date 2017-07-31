@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2015 The Android Open Source Project
+ * Copyright (C) 2017 Projekt Substratum
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package android.content.res;
+package projekt.substratum.platform;
 
+import android.content.substratum.ISubstratumService;
 import android.os.ServiceManager;
 
+public class SubstratumServiceBridge {
+    private static ISubstratumService mInterface;
 
-/**
- * Get a ThemeHelperService object
- */
-public class TH {
-    private static IThemeHelperService sTH;
-
-    public static IThemeHelperService get() {
-        if (sTH == null) {
-            sTH = IThemeHelperService.Stub.asInterface(
-                    ServiceManager.getService("themeHelperService"));
+    public static ISubstratumService get() {
+        if (mInterface == null) {
+            mInterface = ISubstratumService.Stub.asInterface(
+                    ServiceManager.getService("substratum"));
         }
-        return sTH;
+        return mInterface;
     }
 }
+

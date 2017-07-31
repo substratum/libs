@@ -11,7 +11,7 @@ LOCAL_JACK_ENABLED := disabled
 
 LOCAL_PROGUARD_ENABLED := disabled
 
-LOCAL_MODULE := oms_static
+LOCAL_MODULE := libsubstratum_static
 
 include $(BUILD_STATIC_JAVA_LIBRARY)
 

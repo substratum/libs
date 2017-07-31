@@ -18,6 +18,7 @@ package android.content.om;
 
 import android.os.ServiceManager;
 
+import static android.content.Context.OVERLAY_SERVICE;
 
 /**
  * Get a OverlayManager object
@@ -28,7 +29,7 @@ public class OM {
     public static IOverlayManager get() {
         if (sOM == null) {
             sOM = IOverlayManager.Stub.asInterface(
-                    ServiceManager.getService("overlay"));
+                    ServiceManager.getService(OVERLAY_SERVICE));
         }
         return sOM;
     }
